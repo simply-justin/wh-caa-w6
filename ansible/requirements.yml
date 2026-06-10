@@ -1,0 +1,6 @@
+---
+roles:
+  - name: simply_justin.docker_host
+    src: https://github.com/simply-justin/ansible-role-docker-host.git
+    scm: git
+    version: main

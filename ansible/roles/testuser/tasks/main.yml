@@ -1,0 +1,66 @@
+---
+- name: Ensure docker group exists for testuser
+  ansible.builtin.group:
+    name: docker
+    state: present
+
+- name: Create testuser on the hybrid host
+  ansible.builtin.user:
+    name: "{{ testuser_name }}"
+    shell: "{{ testuser_shell }}"
+    create_home: true
+    groups: docker
+    append: true
+
+- name: Ensure testuser SSH directory exists
+  ansible.builtin.file:
+    path: "{{ testuser_ssh_dir }}"
+    state: directory
+    owner: "{{ testuser_name }}"
+    group: "{{ testuser_name }}"
+    mode: "0700"
+
+- name: Authorize generated public key for testuser
+  ansible.builtin.copy:
+    dest: "{{ testuser_ssh_dir }}/authorized_keys"
+    content: "{{ lookup('ansible.builtin.file', testuser_public_key_file) }}\n"
+    owner: "{{ testuser_name }}"
+    group: "{{ testuser_name }}"
+    mode: "0600"
+
+- name: Place private key on ESXi VM for SSH to Azure VM
+  ansible.builtin.copy:
+    dest: "{{ testuser_ssh_dir }}/id_ed25519"
+    content: "{{ lookup('ansible.builtin.file', testuser_private_key_file) }}"
+    owner: "{{ testuser_name }}"
+    group: "{{ testuser_name }}"
+    mode: "0600"
+  when: cloud_provider == "esxi"
+  no_log: true
+
+- name: Scan Azure SSH host key from ESXi VM
+  ansible.builtin.command: "ssh-keyscan -H {{ hostvars[groups['azure'][0]].ansible_host }}"
+  become_user: "{{ testuser_name }}"
+  register: azure_known_hosts
+  changed_when: false
+  failed_when: false
+  when: cloud_provider == "esxi"
+
+- name: Trust Azure VM host key for testuser on ESXi VM
+  ansible.builtin.known_hosts:
+    path: "{{ testuser_ssh_dir }}/known_hosts"
+    name: "{{ hostvars[groups['azure'][0]].ansible_host }}"
+    key: "{{ item }}"
+    state: present
+  loop: "{{ azure_known_hosts.stdout_lines | default([]) }}"
+  when:
+    - cloud_provider == "esxi"
+    - item | length > 0
+
+- name: Ensure testuser known_hosts ownership on ESXi VM
+  ansible.builtin.file:
+    path: "{{ testuser_ssh_dir }}/known_hosts"
+    owner: "{{ testuser_name }}"
+    group: "{{ testuser_name }}"
+    mode: "0644"
+  when: cloud_provider == "esxi"

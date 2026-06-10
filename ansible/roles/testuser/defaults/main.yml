@@ -1,0 +1,3 @@
+---
+testuser_shell: /bin/bash
+testuser_ssh_dir: "/home/{{ testuser_name }}/.ssh"

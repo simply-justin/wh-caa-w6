@@ -1,0 +1,37 @@
+---
+- name: Configure hybrid cloud hosts with Galaxy Docker role
+  hosts: hybrid
+  become: true
+  vars:
+    assignment_week: 6
+  roles:
+    - role: testuser
+    - role: simply_justin.docker_host
+
+- name: Run Hello World container on both clouds
+  hosts: hybrid
+  become: true
+  vars:
+    assignment_week: 6
+  tasks:
+    - name: Pull hybrid Hello World container image
+      ansible.builtin.command: "docker pull {{ container_image }}"
+      register: docker_pull
+      changed_when: "'Downloaded newer image' in docker_pull.stdout or 'Status: Downloaded' in docker_pull.stdout"
+
+    - name: Remove existing hybrid Hello World container
+      ansible.builtin.command: "docker rm -f {{ container_name }}"
+      register: docker_remove
+      changed_when: docker_remove.rc == 0
+      failed_when: false
+
+    - name: Run hybrid Hello World container
+      ansible.builtin.command: >
+        docker run -d
+        --name {{ container_name }}
+        --restart always
+        -p {{ container_http_port }}:{{ container_internal_port }}
+        -e CLOUD_PROVIDER={{ cloud_provider }}
+        -e ASSIGNMENT_WEEK={{ assignment_week }}
+        {{ container_image }}
+      changed_when: true

@@ -1,0 +1,15 @@
+---
+ansible_python_interpreter: /usr/bin/python3
+apt_cache_valid_time: 3600
+
+testuser_name: testuser
+testuser_public_key_file: "{{ playbook_dir }}/../../terraform/hybrid/generated/testuser_id_ed25519.pub"
+testuser_private_key_file: "{{ playbook_dir }}/../../terraform/hybrid/generated/testuser_id_ed25519"
+
+docker_packages:
+  - docker.io
+  - python3-docker
+
+docker_service_name: docker
+container_http_port: 80
+container_internal_port: 8080

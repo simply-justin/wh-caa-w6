@@ -1,0 +1,45 @@
+name: Destroy Hybrid Cloud
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_destroy:
+        description: "Type destroy to remove Azure and ESXi resources"
+        required: true
+        type: string
+
+env:
+  TF_IN_AUTOMATION: "true"
+
+jobs:
+  destroy-hybrid:
+    name: Destroy hybrid infrastructure
+    runs-on: self-hosted
+    if: ${{ github.event.inputs.confirm_destroy == 'destroy' }}
+    defaults:
+      run:
+        working-directory: terraform/hybrid
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          clean: false
+
+      - name: Initialize Terraform
+        run: terraform init
+        env:
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+          TF_VAR_esxi_password: ${{ secrets.ESXI_PASSWORD }}
+
+      - name: Destroy Azure and ESXi resources
+        run: terraform destroy -auto-approve
+        env:
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+          TF_VAR_esxi_password: ${{ secrets.ESXI_PASSWORD }}
