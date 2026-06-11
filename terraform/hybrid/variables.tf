@@ -46,6 +46,18 @@ variable "esxi_hostname" {
   default     = "192.168.1.69"
 }
 
+variable "esxi_hostport" {
+  description = "SSH-poort van de ESXi-server."
+  type        = string
+  default     = "22"
+}
+
+variable "esxi_hostssl" {
+  description = "HTTP-poort van de ESXi-server voor provider uploads."
+  type        = string
+  default     = "80"
+}
+
 variable "esxi_username" {
   description = "Gebruikersnaam voor ESXi."
   type        = string

@@ -111,7 +111,7 @@ jobs:
 
           ESXI_HOST="${ESXI_HOSTNAME:-192.168.1.69}"
           echo "Checking ESXi host ${ESXI_HOST}"
-          nc -vz "${ESXI_HOST}" 443
+          nc -vz "${ESXI_HOST}" 80
 
           terraform -chdir=terraform/hybrid plan -out=tfplan
         env:
