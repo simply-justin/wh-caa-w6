@@ -34,10 +34,16 @@ jobs:
           TF_VAR_esxi_password: ${{ secrets.ESXI_PASSWORD }}
 
       - name: Destroy Azure and ESXi resources
-        run: terraform destroy -auto-approve
+        run: |
+          if [ -n "${AZURE_RESOURCE_GROUP_NAME}" ]; then
+            export TF_VAR_azure_resource_group_name="${AZURE_RESOURCE_GROUP_NAME}"
+          fi
+
+          terraform destroy -auto-approve
         env:
           ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+          AZURE_RESOURCE_GROUP_NAME: ${{ vars.AZURE_RESOURCE_GROUP_NAME }}
           TF_VAR_esxi_password: ${{ secrets.ESXI_PASSWORD }}
