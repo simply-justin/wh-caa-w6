@@ -7,7 +7,7 @@ variable "project_name" {
 variable "azure_resource_group_name" {
   description = "Naam van de Azure resource group."
   type        = string
-  default     = "rg-caa-week6-hybrid"
+  default     = "s1203559"
 }
 
 variable "azure_vnet_cidr" {
@@ -115,7 +115,7 @@ variable "ansible_user" {
 variable "ssh_public_key_path" {
   description = "Pad naar de publieke SSH-key voor de beheeruser."
   type        = string
-  default     = "~/.ssh/id_ed25519.pub"
+  default     = "~/.ssh/azure.pub"
 }
 
 variable "ssh_private_key_path" {
