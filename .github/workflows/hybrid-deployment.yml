@@ -58,7 +58,6 @@ jobs:
           ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-          TF_VAR_esxi_password: ${{ secrets.ESXI_PASSWORD }}
 
       - name: Validate Terraform
         run: terraform validate
@@ -90,12 +89,17 @@ jobs:
           ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-          TF_VAR_esxi_password: ${{ secrets.ESXI_PASSWORD }}
 
       - name: Create Terraform plan
         run: |
           if [ -n "${AZURE_RESOURCE_GROUP_NAME}" ]; then
             export TF_VAR_azure_resource_group_name="${AZURE_RESOURCE_GROUP_NAME}"
+          fi
+          if [ -n "${ESXI_HOSTNAME}" ]; then
+            export TF_VAR_esxi_hostname="${ESXI_HOSTNAME}"
+          fi
+          if [ -n "${ESXI_USERNAME}" ]; then
+            export TF_VAR_esxi_username="${ESXI_USERNAME}"
           fi
 
           terraform -chdir=terraform/hybrid plan -out=tfplan
@@ -105,8 +109,8 @@ jobs:
           ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
           AZURE_RESOURCE_GROUP_NAME: ${{ vars.AZURE_RESOURCE_GROUP_NAME }}
-          TF_VAR_esxi_hostname: ${{ vars.ESXI_HOSTNAME }}
-          TF_VAR_esxi_username: ${{ vars.ESXI_USERNAME }}
+          ESXI_HOSTNAME: ${{ vars.ESXI_HOSTNAME }}
+          ESXI_USERNAME: ${{ vars.ESXI_USERNAME }}
           TF_VAR_esxi_password: ${{ secrets.ESXI_PASSWORD }}
           TF_VAR_container_image: ${{ env.IMAGE_NAME }}:latest
 
@@ -114,6 +118,12 @@ jobs:
         run: |
           if [ -n "${AZURE_RESOURCE_GROUP_NAME}" ]; then
             export TF_VAR_azure_resource_group_name="${AZURE_RESOURCE_GROUP_NAME}"
+          fi
+          if [ -n "${ESXI_HOSTNAME}" ]; then
+            export TF_VAR_esxi_hostname="${ESXI_HOSTNAME}"
+          fi
+          if [ -n "${ESXI_USERNAME}" ]; then
+            export TF_VAR_esxi_username="${ESXI_USERNAME}"
           fi
 
           terraform -chdir=terraform/hybrid apply -auto-approve tfplan
@@ -123,8 +133,8 @@ jobs:
           ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
           AZURE_RESOURCE_GROUP_NAME: ${{ vars.AZURE_RESOURCE_GROUP_NAME }}
-          TF_VAR_esxi_hostname: ${{ vars.ESXI_HOSTNAME }}
-          TF_VAR_esxi_username: ${{ vars.ESXI_USERNAME }}
+          ESXI_HOSTNAME: ${{ vars.ESXI_HOSTNAME }}
+          ESXI_USERNAME: ${{ vars.ESXI_USERNAME }}
           TF_VAR_esxi_password: ${{ secrets.ESXI_PASSWORD }}
 
       - name: Install Ansible Galaxy requirements

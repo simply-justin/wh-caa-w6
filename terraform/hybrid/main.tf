@@ -142,12 +142,12 @@ resource "azurerm_linux_virtual_machine" "hybrid" {
   disable_password_authentication = true
   custom_data = base64encode(templatefile("${path.module}/templates/cloud-init-user-data.tpl", {
     ansible_user   = var.ansible_user
-    ssh_public_key = chomp(file(pathexpand(var.ssh_public_key_path)))
+    ssh_public_key = chomp(file(pathexpand(var.azure_ssh_public_key_path)))
   }))
 
   admin_ssh_key {
     username   = var.ansible_user
-    public_key = chomp(file(pathexpand(var.ssh_public_key_path)))
+    public_key = chomp(file(pathexpand(var.azure_ssh_public_key_path)))
   }
 
   os_disk {
@@ -180,7 +180,7 @@ resource "esxi_guest" "hybrid" {
   guestinfo = {
     "userdata" = base64gzip(templatefile("${path.module}/templates/cloud-init-user-data.tpl", {
       ansible_user   = var.ansible_user
-      ssh_public_key = chomp(file(pathexpand(var.ssh_public_key_path)))
+      ssh_public_key = chomp(file(pathexpand(var.esxi_ssh_public_key_path)))
     }))
     "userdata.encoding" = "gzip+base64"
   }
@@ -194,16 +194,17 @@ locals {
 resource "local_file" "terraform_inventory" {
   filename = "${path.module}/inventory.ini"
   content = templatefile("${path.module}/templates/inventory.tpl", {
-    azure_vm_name        = var.azure_vm_name
-    azure_public_ip      = local.azure_public_ip
-    esxi_vm_name         = var.esxi_vm_name
-    esxi_host_ip         = local.esxi_host_ip
-    ansible_user         = var.ansible_user
-    ssh_private_key_path = var.ssh_private_key_path
-    testuser_private_key = local_sensitive_file.testuser_private_key.filename
-    testuser_public_key  = local_file.testuser_public_key.filename
-    container_image      = var.container_image
-    container_name       = var.container_name
+    azure_vm_name             = var.azure_vm_name
+    azure_public_ip           = local.azure_public_ip
+    esxi_vm_name              = var.esxi_vm_name
+    esxi_host_ip              = local.esxi_host_ip
+    ansible_user              = var.ansible_user
+    azure_ssh_private_key_path = var.azure_ssh_private_key_path
+    esxi_ssh_private_key_path  = var.esxi_ssh_private_key_path
+    testuser_private_key      = local_sensitive_file.testuser_private_key.filename
+    testuser_public_key       = local_file.testuser_public_key.filename
+    container_image           = var.container_image
+    container_name            = var.container_name
   })
 }
 

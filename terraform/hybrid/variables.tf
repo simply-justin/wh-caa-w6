@@ -101,7 +101,7 @@ variable "esxi_virtual_network" {
 }
 
 variable "esxi_nic_type" {
-  description = "Type netwerkkaart voor de ESXi VM."
+  description = "Type netwerkkaart voor de VM."
   type        = string
   default     = "vmxnet3"
 }
@@ -112,16 +112,28 @@ variable "ansible_user" {
   default     = "ubuntu"
 }
 
-variable "ssh_public_key_path" {
-  description = "Pad naar de publieke SSH-key voor de beheeruser."
+variable "azure_ssh_public_key_path" {
+  description = "Pad naar de publieke Azure SSH-key voor de beheeruser."
   type        = string
   default     = "~/.ssh/azure.pub"
 }
 
-variable "ssh_private_key_path" {
-  description = "Pad naar de private SSH-key voor de beheeruser."
+variable "azure_ssh_private_key_path" {
+  description = "Pad naar de private Azure SSH-key die Ansible gebruikt."
   type        = string
-  default     = "~/.ssh/id_ed25519"
+  default     = "~/.ssh/azure"
+}
+
+variable "esxi_ssh_public_key_path" {
+  description = "Pad naar de publieke Skylab SSH-key voor de ESXi VM."
+  type        = string
+  default     = "~/.ssh/skylab.pub"
+}
+
+variable "esxi_ssh_private_key_path" {
+  description = "Pad naar de private Skylab SSH-key die Ansible gebruikt."
+  type        = string
+  default     = "~/.ssh/skylab"
 }
 
 variable "container_image" {
