@@ -93,13 +93,6 @@ jobs:
           ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
-      - name: Install ESXi connectivity tools
-        run: |
-          if ! command -v sshpass >/dev/null 2>&1; then
-            sudo apt-get update
-            sudo apt-get install -y sshpass
-          fi
-
       - name: Create Terraform plan
         run: |
           if [ -n "${AZURE_RESOURCE_GROUP_NAME}" ]; then
@@ -114,13 +107,11 @@ jobs:
 
           test -f "${HOME}/.ssh/azure.pub"
           test -f "${HOME}/.ssh/skylab.pub"
+          test -n "${TF_VAR_esxi_password}"
 
           ESXI_HOST="${ESXI_HOSTNAME:-192.168.1.69}"
-          ESXI_USER="${ESXI_USERNAME:-root}"
           echo "Checking ESXi host ${ESXI_HOST}"
-          nc -vz "${ESXI_HOST}" 22
           nc -vz "${ESXI_HOST}" 443
-          sshpass -p "${TF_VAR_esxi_password}" ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 "${ESXI_USER}@${ESXI_HOST}" "vim-cmd vmsvc/getallvms >/dev/null"
 
           terraform -chdir=terraform/hybrid plan -out=tfplan
         env:
