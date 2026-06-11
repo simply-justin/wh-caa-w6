@@ -49,7 +49,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Check Terraform formatting
-        run: terraform fmt -check -recursive .
+        run: terraform fmt -check -diff -recursive .
 
       - name: Initialize Terraform
         run: terraform init
@@ -60,7 +60,10 @@ jobs:
           ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
       - name: Validate Terraform
-        run: terraform validate
+        run: |
+          test -f "${HOME}/.ssh/azure.pub"
+          test -f "${HOME}/.ssh/skylab.pub"
+          terraform validate
 
       - name: Set up TFLint
         uses: terraform-linters/setup-tflint@v4
@@ -101,6 +104,9 @@ jobs:
           if [ -n "${ESXI_USERNAME}" ]; then
             export TF_VAR_esxi_username="${ESXI_USERNAME}"
           fi
+
+          test -f "${HOME}/.ssh/azure.pub"
+          test -f "${HOME}/.ssh/skylab.pub"
 
           terraform -chdir=terraform/hybrid plan -out=tfplan
         env:
