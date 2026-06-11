@@ -25,17 +25,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          clean: false
-
-      - name: Debug Docker permissions
-        run: |
-          echo "runner=${RUNNER_NAME}"
-          echo "user=$(whoami)"
-          id
-          groups
-          ls -l /var/run/docker.sock
-          docker version
 
       - name: Log in to GitHub Container Registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
@@ -58,8 +47,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          clean: false
 
       - name: Check Terraform formatting
         run: terraform fmt -check -recursive .
@@ -92,8 +79,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          clean: false
 
       - name: Initialize Terraform
         run: terraform -chdir=terraform/hybrid init
