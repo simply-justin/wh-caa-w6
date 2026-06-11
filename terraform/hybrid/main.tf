@@ -130,17 +130,17 @@ resource "azurerm_network_interface_security_group_association" "hybrid" {
 }
 
 resource "azurerm_linux_virtual_machine" "hybrid" {
-  name                = var.azure_vm_name
-  resource_group_name = data.azurerm_resource_group.hybrid.name
-  location            = data.azurerm_resource_group.hybrid.location
-  size                = var.azure_vm_size
-  admin_username      = var.ansible_user
+  name                  = var.azure_vm_name
+  resource_group_name   = data.azurerm_resource_group.hybrid.name
+  location              = data.azurerm_resource_group.hybrid.location
+  size                  = var.azure_vm_size
+  admin_username        = var.ansible_user
   network_interface_ids = [
     azurerm_network_interface.hybrid.id
   ]
 
   disable_password_authentication = true
-  custom_data = base64encode(templatefile("${path.module}/templates/cloud-init-user-data.tpl", {
+  custom_data                     = base64encode(templatefile("${path.module}/templates/cloud-init-user-data.tpl", {
     ansible_user   = var.ansible_user
     ssh_public_key = chomp(file(pathexpand(var.azure_ssh_public_key_path)))
   }))
@@ -178,7 +178,7 @@ resource "esxi_guest" "hybrid" {
   }
 
   guestinfo = {
-    "userdata" = base64gzip(templatefile("${path.module}/templates/cloud-init-user-data.tpl", {
+    "userdata"          = base64gzip(templatefile("${path.module}/templates/cloud-init-user-data.tpl", {
       ansible_user   = var.ansible_user
       ssh_public_key = chomp(file(pathexpand(var.esxi_ssh_public_key_path)))
     }))
@@ -194,17 +194,17 @@ locals {
 resource "local_file" "terraform_inventory" {
   filename = "${path.module}/inventory.ini"
   content = templatefile("${path.module}/templates/inventory.tpl", {
-    azure_vm_name             = var.azure_vm_name
-    azure_public_ip           = local.azure_public_ip
-    esxi_vm_name              = var.esxi_vm_name
-    esxi_host_ip              = local.esxi_host_ip
-    ansible_user              = var.ansible_user
+    azure_vm_name              = var.azure_vm_name
+    azure_public_ip            = local.azure_public_ip
+    esxi_vm_name               = var.esxi_vm_name
+    esxi_host_ip               = local.esxi_host_ip
+    ansible_user               = var.ansible_user
     azure_ssh_private_key_path = var.azure_ssh_private_key_path
     esxi_ssh_private_key_path  = var.esxi_ssh_private_key_path
-    testuser_private_key      = local_sensitive_file.testuser_private_key.filename
-    testuser_public_key       = local_file.testuser_public_key.filename
-    container_image           = var.container_image
-    container_name            = var.container_name
+    testuser_private_key       = local_sensitive_file.testuser_private_key.filename
+    testuser_public_key        = local_file.testuser_public_key.filename
+    container_image            = var.container_image
+    container_name             = var.container_name
   })
 }
 
