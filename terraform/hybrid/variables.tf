@@ -10,12 +10,6 @@ variable "azure_resource_group_name" {
   default     = "rg-caa-week6-hybrid"
 }
 
-variable "azure_location" {
-  description = "Azure regio voor de resources."
-  type        = string
-  default     = "westeurope"
-}
-
 variable "azure_vnet_cidr" {
   description = "CIDR range voor het Azure virtual network."
   type        = string

@@ -4,7 +4,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.116"
+      version = "~> 4.0"
     }
 
     esxi = {
@@ -25,9 +25,8 @@ terraform {
 }
 
 provider "azurerm" {
-  resource_provider_registrations = "none"
-
   features {}
+  resource_provider_registrations = "none"
 }
 
 provider "esxi" {
@@ -52,29 +51,28 @@ resource "local_file" "testuser_public_key" {
   file_permission = "0644"
 }
 
-resource "azurerm_resource_group" "hybrid" {
-  name     = var.azure_resource_group_name
-  location = var.azure_location
+data "azurerm_resource_group" "hybrid" {
+  name = var.azure_resource_group_name
 }
 
 resource "azurerm_virtual_network" "hybrid" {
   name                = "${var.project_name}-vnet"
   address_space       = [var.azure_vnet_cidr]
-  location            = azurerm_resource_group.hybrid.location
-  resource_group_name = azurerm_resource_group.hybrid.name
+  location            = data.azurerm_resource_group.hybrid.location
+  resource_group_name = data.azurerm_resource_group.hybrid.name
 }
 
 resource "azurerm_subnet" "hybrid" {
   name                 = "${var.project_name}-subnet"
-  resource_group_name  = azurerm_resource_group.hybrid.name
+  resource_group_name  = data.azurerm_resource_group.hybrid.name
   virtual_network_name = azurerm_virtual_network.hybrid.name
   address_prefixes     = [var.azure_subnet_cidr]
 }
 
 resource "azurerm_network_security_group" "hybrid" {
   name                = "${var.project_name}-nsg"
-  location            = azurerm_resource_group.hybrid.location
-  resource_group_name = azurerm_resource_group.hybrid.name
+  location            = data.azurerm_resource_group.hybrid.location
+  resource_group_name = data.azurerm_resource_group.hybrid.name
 }
 
 resource "azurerm_network_security_rule" "ssh" {
@@ -87,7 +85,7 @@ resource "azurerm_network_security_rule" "ssh" {
   destination_port_range      = "22"
   source_address_prefix       = var.allowed_source_address_prefix
   destination_address_prefix  = "*"
-  resource_group_name         = azurerm_resource_group.hybrid.name
+  resource_group_name         = data.azurerm_resource_group.hybrid.name
   network_security_group_name = azurerm_network_security_group.hybrid.name
 }
 
@@ -101,22 +99,22 @@ resource "azurerm_network_security_rule" "http" {
   destination_port_range      = "80"
   source_address_prefix       = var.allowed_source_address_prefix
   destination_address_prefix  = "*"
-  resource_group_name         = azurerm_resource_group.hybrid.name
+  resource_group_name         = data.azurerm_resource_group.hybrid.name
   network_security_group_name = azurerm_network_security_group.hybrid.name
 }
 
 resource "azurerm_public_ip" "hybrid" {
   name                = "${var.azure_vm_name}-pip"
-  location            = azurerm_resource_group.hybrid.location
-  resource_group_name = azurerm_resource_group.hybrid.name
+  location            = data.azurerm_resource_group.hybrid.location
+  resource_group_name = data.azurerm_resource_group.hybrid.name
   allocation_method   = "Static"
   sku                 = "Standard"
 }
 
 resource "azurerm_network_interface" "hybrid" {
   name                = "${var.azure_vm_name}-nic"
-  location            = azurerm_resource_group.hybrid.location
-  resource_group_name = azurerm_resource_group.hybrid.name
+  location            = data.azurerm_resource_group.hybrid.location
+  resource_group_name = data.azurerm_resource_group.hybrid.name
 
   ip_configuration {
     name                          = "internal"
@@ -133,8 +131,8 @@ resource "azurerm_network_interface_security_group_association" "hybrid" {
 
 resource "azurerm_linux_virtual_machine" "hybrid" {
   name                = var.azure_vm_name
-  resource_group_name = azurerm_resource_group.hybrid.name
-  location            = azurerm_resource_group.hybrid.location
+  resource_group_name = data.azurerm_resource_group.hybrid.name
+  location            = data.azurerm_resource_group.hybrid.location
   size                = var.azure_vm_size
   admin_username      = var.ansible_user
   network_interface_ids = [
